@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>猫ドラ UR確定5連シミュレーター</title>
+<style>
+  body {
+    font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', sans-serif;
+    background-color: #12161f;
+    color: #ffffff;
+    margin: 0;
+    padding: 15px;
+    text-align: center;
+  }
+  .container {
+    max-width: 500px;
+    margin: 0 auto;
+    background: #1e2433;
+    border: 2px solid #3a445e;
+    border-radius: 12px;
+    padding: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.6);
+  }
+  h1 {
+    font-size: 18px;
+    margin: 0 0 15px 0;
+    padding: 8px;
+    background: linear-gradient(90deg, #1c5fab, #10437d, #1c5fab);
+    border-radius: 6px;
+    border: 1px solid #5a85b5;
+  }
+  .btn-group {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 15px;
+  }
+  button {
+    font-size: 16px;
+    font-weight: bold;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.05s, opacity 0.2s;
+  }
+  button:active {
+    transform: scale(0.96);
+  }
+  .btn-pull {
+    background: linear-gradient(180deg, #ff5e7e, #d61c4e);
+    color: white;
+    flex: 2;
+    box-shadow: 0 3px 0 #8f0c2e;
+  }
+  .btn-pull10 {
+    background: linear-gradient(180deg, #f7b731, #e58e26);
+    color: #fff;
+    flex: 1;
+    box-shadow: 0 3px 0 #9e5b0b;
+  }
+  .btn-reset {
+    background: #4b5563;
+    color: #e5e7eb;
+    padding: 8px 14px;
+    font-size: 13px;
+  }
+  .results {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 20px;
+    min-height: 230px;
+  }
+  .card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: bold;
+    background: #2a3246;
+    border-left: 6px solid #6b7280;
+    text-align: left;
+  }
+  .badge {
+    font-size: 11px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-right: 6px;
+    display: inline-block;
+  }
+  .type-orb { background: #6d28d9; color: #fff; }
+  .type-dragon { background: #047857; color: #fff; }
+
+  /* コスト別装飾 */
+  .cost-17 { border-left-color: #60a5fa; }
+  .cost-18 { border-left-color: #34d399; }
+  .cost-19 { border-left-color: #f87171; background: #3b232e; color: #fca5a5; }
+  .cost-20 {
+    border-left-color: #fbbf24;
+    background: linear-gradient(90deg, #423316, #2a241b);
+    color: #fde68a;
+    border: 1px solid #d97706;
+    border-left-width: 6px;
+  }
+  .cost-21 {
+    background: linear-gradient(90deg, #3b1c42, #1e293b, #3b1c42);
+    color: #ffffff;
+    border: 2px solid #f472b6;
+    box-shadow: 0 0 10px rgba(244, 114, 182, 0.6);
+    animation: pulse 1.5s infinite;
+  }
+  @keyframes pulse {
+    0% { box-shadow: 0 0 6px rgba(244, 114, 182, 0.5); }
+    50% { box-shadow: 0 0 14px rgba(96, 165, 250, 0.9); }
+    100% { box-shadow: 0 0 6px rgba(244, 114, 182, 0.5); }
+  }
+
+  .stats-box {
+    background: #151924;
+    border: 1px solid #2e364a;
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 13px;
+    text-align: left;
+  }
+  .stats-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #2e364a;
+    padding-bottom: 6px;
+    margin-bottom: 8px;
+    font-weight: bold;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 10px;
+  }
+  th, td {
+    padding: 4px 6px;
+    text-align: right;
+    border-bottom: 1px solid #222938;
+  }
+  th:first-child, td:first-child { text-align: left; }
+  .history-box {
+    max-height: 100px;
+    overflow-y: auto;
+    background: #0f121a;
+    padding: 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    color: #fde68a;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>アーリーアニバーサリー UR確定ガチャ</h1>
+  
+  <div class="btn-group">
+    <button class="btn-pull" onclick="pullGacha(5)">5連を引く</button>
+    <button class="btn-pull10" onclick="pullGacha(10)">10連</button>
+  </div>
+
+  <div id="results" class="results">
+    <div style="color: #9ca3af; margin-top: 80px;">上のボタンを押してガチャを引いてください</div>
+  </div>
+
+  <div class="stats-box">
+    <div class="stats-header">
+      <span>累計回数: <span id="total-pulls">0</span>連</span>
+      <button class="btn-reset" onclick="resetStats()">リセット</button>
+    </div>
+    <table>
+      <thead>
+        <tr><th>コスト帯</th><th>排出数</th><th>実測確率</th><th>理論値目安</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>コスト21</td><td id="cnt-21">0</td><td id="rate-21">0.0%</td><td>0.70%</td></tr>
+        <tr><td>コスト20</td><td id="cnt-20">0</td><td id="rate-20">0.0%</td><td>4.07%</td></tr>
+        <tr><td>コスト19</td><td id="cnt-19">0</td><td id="rate-19">0.0%</td><td>9.99%</td></tr>
+        <tr><td>コスト18</td><td id="cnt-18">0</td><td id="rate-18">0.0%</td><td>34.85%</td></tr>
+        <tr><td>コスト17</td><td id="cnt-17">0</td><td id="rate-17">0.0%</td><td>50.18%</td></tr>
+      </tbody>
+    </table>
+    <div style="margin-bottom: 4px; font-weight: bold; color: #cbd5e1;">★高コスト(20以上)獲得履歴:</div>
+    <div id="high-history" class="history-box">なし</div>
+  </div>
+</div>
+
+<script>
+// ユニットデータ定義
+const rawData = [
+  // URオーブ
+  { cost: 17, type: "オーブ", weight: 1.13, names: ["[オルレアンの乙女]ジャンヌ","[守護の女神]アテナ","[輝きの御子]アポロン","[誘惑の花嫁]アスモデウス","[狩猟の女神]アルテミス","[食いしん坊な女神]サトゥルヌス","[無邪姫]グウィネヴィア","[踊る猫神]バステト","[拐かしの魔女]ブローディア","[新緑の守り手]マツバ","[花を愛する乙女]コレー","[人守の英雄神]オキクルミ","[愛と美の女神]ヴィーナス","[身削の精霊]夕鶴","[人嫌いな月桂樹]ダフネ","[夢見る花嫁]ユーノー","[噴炎の女王]ペレ","[毒のある微笑み]バズヴ","[爆雷神]カンナカムイ","[イタズラ夢魔]ラマシュトゥ","[禍いをもたらす者]マラコーダ","[冥界への導き手]ロタ","[熱き闘神]ニヌルタ","[北風の弓矢]キュレネ","[嵐の化身]フラカン","[小春日和の剣士]テマリ","[艶やか美女]陰摩羅鬼","[正義の盾]ヘルヴォル","[亡国の騎士]ディネマ","[ピエロ少年の悪戯]ピエロット","[笑顔のお届け人]トリトマ","[魔剣神]テュール","[特製飲茶の秘密]イェンファ","[気高き英雄]エシェック","[全てを見通す瞳]ホルス","[気楽な旅人]ヴォーロス","[治世の悪魔]ヤクルス","[安息の守り手]セメテリ","[悪魔の行進]ムル","[奈落の王]アバドン","[魔剣グラムの使い手]シグルド"] },
+  { cost: 18, type: "オーブ", weight: 0.655, names: ["[絶世の美女]クレオパトラ","[交路の守護者]ヘカテ","[騎士王]アーサー","[宵闇の月姫]ツクヨミ","[時の神]クロノス","[さすらいの吸血鬼]アルカード","[英雄神]ペルセウス","[翼を手に入れた鳥人]イカロス","[蓮華に咲く山娘]パールヴァティ","[魔海の乙女]レヴィアタン","[純白の美神]フレイヤ","[孤灯の火神]カグツチ","[終わらせる者]ロプト","[寡黙な城主]ウートガルディロキ","[三女神の一柱]ヴァハ","[眠りの神]ヒュプノス","[魔弾の鋳造主]ザミエル","[雄々しき獣人]ナラシンハ","[わがまま悪魔]ベリル","[孤高の研究者]ラクトリス","[滅びの姫]アルシエル","[魅惑の歌姫]セイレーン","[蒼月の眼差し]ルーナ","[地下世界]エレボス","[翡翠の魔導士]クロサンドラ","[記録の管理者]ムネーメー","[優しさの音色]カペラ","[不安の炎]フラウラ","[天下の寵姫]玉藻前","[孤高の狼騎士]ハダル","[気怠げクリエイター]カイルス","[クールメイド]アルテミア","[愛されし弁論]カリオペ","[秘めし魔法]リコッタ","[救いの火明かり]エキノ","[葡萄酒の神]バッカス","[神々の王]マルドゥーク","[遍歴の風術師]トゥルイエ","[寂しがり屋なお人形]マーチ","[相反する定義]カスピエル","[火の粉舞う包丁捌き]ジャン","[炎の申し子]フリント","[女帝戦神]豹尾","[幸運の妖っ子]わらべ","[心優しき海王]バラムンディ","[孤高の光騎士]スティクス","[炎鈴の転音]賽太歳","[業火の剣士]ウリエル","[優秀な騎士見習い]エレイン","[元気なギャルスラ]サニティ"] },
+  { cost: 19, type: "オーブ", weight: 0.172, names: ["[冥府の王]ハデス","[英雄王]ギルガメッシュ","[端厳なる神妃]ヘラ","[黒き破壊神]シヴァ","[光もたらす堕天使]ルシファー","[変幻自在の悪戯神]ロキ","[海と大地の支配神]ポセイドン","[世界を照らす者]アトゥム","[穢の魔女]ランダ","[猛き荒神]スサノオ","[雷撃の戦神]ソー","[臆病ブルーアイズ]アンピトリテ","[紫花の舞踊姫]黒百合姫","[無情の椅子]レウケ","[弓の名手]ロビンフッド","[湖の騎士]ランスロット","[永燃の悪魔]オリエンス","[篝火の魔女]ヴァルプルギス","[暴れん坊の猿]孫悟空","[遮那王]牛若丸","[破滅の王]オイディプス","[不運のショートヘア]シヴ","[孤高の吸血鬼狩人]ダンピール","[異端なる調合師]ケリドウェン","[東方の支配者]バアル","[陰陽師]安倍晴明","[平和主義者]パリス","[酷焔の化身]トヒル","[吸魂花]エルジェーベト","[魔封の匠]オグマ","[無邪気な蛇姫]ヒナガヒメ","[秘める炎]ナタナエル","[過小評価主義]リュウゼ","[勇敢なる戦神]アータル","[わがま魔姫]ローゼル","[試練の戦神]シェセム","[亡命研究者]コラプサー","[ポイズンドール]アコナイト","[兎の冒険]キャロトール","[不思議な少女]サバト","[春風の気配]プリマヴェーラ","[神を呼ぶ声]ツヅミ","[金蜂龍騎]カラブローネ","[一等星の魔法使い]アケルナル","[天地変革]サンダルフォン","[彷徨う鎮魂歌]キリエ","[魔刀拳士への道]カラカ","[結晶の化身]クリスタル","[救えなかった命]竜胆","[魔導武器宣伝部隊長]ゼノア","[迷子の召喚士]アリス","[真実の領主]オシリス","[夢現の羊飼い]ドリーム","[宮廷料理人]ボタン"] },
+  { cost: 20, type: "オーブ", weight: 0.0885, names: ["[隻眼の戦神]オーディン","[王殺しの天使]レジサイド","[日天の女神]アマテラス","[真の戦乙女]ジャンヌ","[外道姫]酒呑童子","[秘密の騎士]アルカナ","[神々の母]キュベレー","[高名な魔術師]マーリン","[黄泉の主宰神]イザナミ","[戦士女王]ゼノビア","[静寂を愛する神]スヴァローグ","[悪魔の囁き]デモン","[神の星]コカビエル","[魂を運ぶ者]タナトス","[日本武尊]ヤマトタケル","[黒曜の戦士]オセロメ","[見つけた一番星]トレミー","[偽の創造主]ヤルダバオート","[魔力生物研究者]ダーウィン","[制御不能の雷槌]タケミカヅチ","[裁きの稲妻]ペルーン","[火を喰らう者]禍斗","[嫋やかな流水]アヌケト","[呪いの羅列]メノウ","[狐火の幽光]銀狐","[授けの女神]弁財天","[宇宙の創造主]ブラフマー","[異界の真実]シーガル","[時代の風雲児]暁","[知識の泉]テウト","[聖癒の微笑み]オンシジューム","[命を吹き込むもの]大国主","[のらくら武士]前田慶次","[乙女の森]アパイア","[金瞳の魔術師]ディサ","[兄一途]アナト","[悪魔の金貨]マモン","[甲斐の白虎]武田信玄","[平和の象徴]黒狐","[封魔の壺師]ジャッラ","[慈悲なき堕天使]アザゼル","[秘めたる闇]プロケル"] },
+  { cost: 21, type: "オーブ", weight: 0.0536, names: ["[もふもふ騎士]クー","[国産みの神]イザナギ","[竜狩の魔道士]ブルーノ","[金印の幸巫女]卑弥呼","[千福万来]シアナ","[気新光照]アマテラス","[傲慢な愛猫家]メドラウト","[慶雲昌光]スサノオ","[猫飼いの竜姫]モルガナ","[初凪の月姫]ツクヨミ","[魔装騎士]ヘキサ","[ほころぶ蕾]コノハナサクヤ","[夢世界の案内人]シャパリュ"] },
+  // URドラゴン (UR確定枠換算: シングル確率 × 100 / 1.3)
+  { cost: 17, type: "ドラゴン", weight: 0.005 * 100 / 1.3, names: ["ファフニール","ヴリトラ","ヨトゥンヘイム","アースガルズ","天鶏","アラマズド","ネメア","フィンブルヴェト","ウートガルズ","ヴィゾーヴニル"] },
+  { cost: 18, type: "ドラゴン", weight: 0.000909 * 100 / 1.3, names: ["フェニックス","ガルーダ","アトラス","ムシュフシュ","ハヌマーン","パブロペトリ","シリウス","ジャガーノート","オメテオトル","バロン","ブリーラー・レッスル","ア・プチ","ガラガラドン","ガンダルヴァ","メガラニカ","ミアプラキドゥス","タツノミヤ","ビフレスト","カスティーヨ","ラプシヌプルクル","アンゲロス","カワチ","カルーゼル","クノッソス","ミーティア","ニシキ","オオモノヌシ","アークトゥルス","ステラ","ドクガン"] },
+  { cost: 19, type: "ドラゴン", weight: 0.000267 * 100 / 1.3, names: ["バハムート","テュポーン","ウロボロス","トナティウ","ペイルライダー","アポカリプス","フローズヴィトニル","ハクタク","ティタノマキア","黄龍","月輪龍","グラム","シバルバー","ネクロタフィオ","ストリゴイ","ピンギキュラ","コンセイ","シェーシャ","グリンカムビ","アペプ","ヴァララウコ","オロシリアン","カフィカ","バダイ","ルアウモコ","ローザンヌ","カプ","イエティ","ジェンネト","コウゲ","ボーデイ","シェアト","キュウビ・ノワール","ネクロノミコン"] },
+  { cost: 20, type: "ドラゴン", weight: 0.000239 * 100 / 1.3, names: ["アプス","ティアマト","ヴァルハラ","タルタロス","ウシュムガル","ミノタウロス","ユグドラシル","ギンヌンガガプ","レーヴァテイン","グレイプニル","ヘイズルーン","ラモール","ダルメ","ホーヴヴァルプニル","アビドス","アンビュロケタス","スリュムヘイム","ヌクレオ","ヤパン"] }
+];
+
+// 抽選プールの構築
+const pool = [];
+let totalWeight = 0;
+
+rawData.forEach(group => {
+  group.names.forEach(name => {
+    totalWeight += group.weight;
+    pool.push({
+      name: name,
+      cost: group.cost,
+      type: group.type,
+      weight: group.weight,
+      cumulative: totalWeight
+    });
+  });
+});
+
+// 統計データ
+let totalPulls = 0;
+let counts = { 17: 0, 18: 0, 19: 0, 20: 0, 21: 0 };
+let highHistory = [];
+
+function drawOne() {
+  const r = Math.random() * totalWeight;
+  for (let i = 0; i < pool.length; i++) {
+    if (r <= pool[i].cumulative) {
+      return pool[i];
+    }
+  }
+  return pool[pool.length - 1];
+}
+
+function pullGacha(num) {
+  const resultsDiv = document.getElementById("results");
+  resultsDiv.innerHTML = "";
+
+  for (let i = 0; i < num; i++) {
+    const unit = drawOne();
+    totalPulls++;
+    counts[unit.cost]++;
+
+    if (unit.cost >= 20) {
+      highHistory.unshift(`[${totalPulls}連目] コスト${unit.cost} (${unit.type}) ${unit.name}`);
+    }
+
+    const card = document.createElement("div");
+    card.className = `card cost-${unit.cost}`;
+    const badgeClass = unit.type === "オーブ" ? "type-orb" : "type-dragon";
+    
+    card.innerHTML = `
+      <div>
+        <span class="badge ${badgeClass}">${unit.type}</span>
+        <span>コスト${unit.cost} ${unit.name}</span>
+      </div>
+    `;
+    resultsDiv.appendChild(card);
+  }
+
+  updateStats();
+}
+
+function updateStats() {
+  document.getElementById("total-pulls").innerText = totalPulls;
+  [17, 18, 19, 20, 21].forEach(c => {
+    document.getElementById(`cnt-${c}`).innerText = counts[c];
+    const rate = totalPulls > 0 ? ((counts[c] / totalPulls) * 100).toFixed(2) : "0.0";
+    document.getElementById(`rate-${c}`).innerText = rate + "%";
+  });
+
+  const histDiv = document.getElementById("high-history");
+  if (highHistory.length > 0) {
+    histDiv.innerHTML = highHistory.join("<br>");
+  } else {
+    histDiv.innerText = "なし";
+  }
+}
+
+function resetStats() {
+  totalPulls = 0;
+  counts = { 17: 0, 18: 0, 19: 0, 20: 0, 21: 0 };
+  highHistory = [];
+  document.getElementById("results").innerHTML = '<div style="color: #9ca3af; margin-top: 80px;">リセットしました。ボタンを押してガチャを引いてください</div>';
+  updateStats();
+}
+</script>
+</body>
+</html>
